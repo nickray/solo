@@ -1,7 +1,11 @@
-CC=arm-none-eabi-gcc
-CP=arm-none-eabi-objcopy
-SZ=arm-none-eabi-size
-AR=arm-none-eabi-ar
+# CC=arm-none-eabi-gcc
+# CP=arm-none-eabi-objcopy
+# SZ=arm-none-eabi-size
+# AR=arm-none-eabi-ar
+CC=clang-7
+CP=llvm-objcopy-7
+SZ=llvm-size-7
+AR=llvm-ar-7
 
 # ST related
 SRC = src/main.c src/init.c src/redirect.c src/flash.c src/rng.c src/led.c src/device.c
@@ -24,6 +28,8 @@ OBJ=$(OBJ1:.s=.o)
 INC = -Isrc/ -Isrc/cmsis/ -Ilib/ -Ilib/usbd/ -I../../fido2/ -I../../fido2/extensions
 INC += -I../../tinycbor/src -I../../crypto/sha256 -I../../crypto/micro-ecc
 INC += -I../../crypto/tiny-AES-c
+# where is stdio.h
+INC += -I /usr/include/newlib
 
 SEARCH=-L../../tinycbor/lib
 
@@ -32,7 +38,7 @@ LDSCRIPT=stm32l432xx.ld
 CFLAGS= $(INC)
 
 TARGET=solo
-HW=-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb
+HW=-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -target arm-none-eabi
 
 # Nucleo board
 #CHIP=STM32L432xx
@@ -43,6 +49,7 @@ DEFINES = -D$(CHIP) -DAES256=1  -DUSE_FULL_LL_DRIVER
 # DEFINES += -DTEST_SOLO_STM32 -DTEST -DTEST_FIFO=1
 
 CFLAGS=$(INC) -c $(DEFINES)   -Wall -fdata-sections -ffunction-sections $(HW)
+# CFLAGS=$(INC) -c $(DEFINES)   -fdata-sections -ffunction-sections $(HW)
 LDFLAGS_LIB=$(HW) $(SEARCH) -specs=nano.specs  -specs=nosys.specs  -Wl,--gc-sections -u _printf_float -lnosys
 LDFLAGS=$(HW) $(LDFLAGS_LIB) -T$(LDSCRIPT) -Wl,-Map=$(TARGET).map,--cref -ltinycbor
 

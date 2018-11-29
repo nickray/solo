@@ -17,6 +17,11 @@ static void flash_unlock()
     }
 }
 
+void flash_lock()
+{
+    FLASH->CR |= (1U<<31);
+}
+
 // Locks flash and turns off DFU
 void flash_option_bytes_init(int boot_from_dfu)
 {
@@ -139,7 +144,3 @@ void flash_write(uint32_t addr, uint8_t * data, size_t sz)
 
 }
 
-void flash_lock()
-{
-    FLASH->CR |= (1U<<31);
-}
