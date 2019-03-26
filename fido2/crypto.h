@@ -23,6 +23,13 @@ void crypto_sha512_init();
 void crypto_sha512_update(const uint8_t * data, size_t len);
 void crypto_sha512_final(uint8_t * hash);
 
+void crypto_ed25519_init();
+void crypto_ed25519_sign(
+    uint8_t *signed_message, size_t *signed_message_len,
+    const uint8_t *message, size_t message_len//,
+    /* const uint8_t *secret_key */
+);
+
 
 void crypto_ecc256_init();
 void crypto_ecc256_derive_public_key(uint8_t * data, int len, uint8_t * x, uint8_t * y);

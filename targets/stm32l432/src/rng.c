@@ -19,6 +19,9 @@ void rng_get_bytes(uint8_t * dst, size_t sz)
 {
     uint8_t r[4];
     unsigned int i,j;
+    /* printf2(TAG_ERR, "rng_get_bytes sz = %02lx\r\n", sz); */
+    /* sz = 32; */
+    /* printf2(TAG_ERR, "rng_get_bytes fixed sz = %02lx\r\n", sz); */
     for (i = 0; i < sz; i += 4)
     {
         while( !LL_RNG_IsActiveFlag_DRDY(RNG) )
@@ -40,6 +43,15 @@ void rng_get_bytes(uint8_t * dst, size_t sz)
             dst[i + j] = r[j];
         }
     }
+}
+
+void randombytes(uint8_t *dst, uint64_t sz)
+{
+    // unsafe...
+    // NB: if we declare sz in randombytes as size_t (= uint32_t),
+    // the linker will happily link with tweetnacl.c's `randombytes`,
+    // and corrupt the numbers (e.g. 32 bytes turns into a huge number)
+    rng_get_bytes(dst, (size_t) sz);
 }
 
 float shannon_entropy(float * p, size_t sz)

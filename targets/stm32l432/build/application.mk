@@ -15,6 +15,7 @@ SRC += ../../fido2/extensions/extensions.c ../../fido2/extensions/solo.c
 # Crypto libs
 SRC += ../../crypto/sha256/sha256.c ../../crypto/micro-ecc/uECC.c ../../crypto/tiny-AES-c/aes.c
 SRC += ../../crypto/cifra/src/sha512.c ../../crypto/cifra/src/blockwise.c
+SRC += ../../crypto/tweetnacl/tweetnacl.c
 
 OBJ1=$(SRC:.c=.o)
 OBJ=$(OBJ1:.s=.o)
@@ -23,6 +24,7 @@ INC = -Isrc/ -Isrc/cmsis/ -Ilib/ -Ilib/usbd/ -I../../fido2/ -I../../fido2/extens
 INC += -I../../tinycbor/src -I../../crypto/sha256 -I../../crypto/micro-ecc
 INC += -I../../crypto/tiny-AES-c
 INC += -I../../crypto/cifra/src -I../../crypto/cifra/src/ext
+INC += -I../../crypto/tweetnacl/
 
 SEARCH=-L../../tinycbor/lib
 

@@ -16,6 +16,7 @@
 
 #include "util.h"
 #include "crypto.h"
+#include "rng.h"
 
 #ifdef USE_SOFTWARE_IMPLEMENTATION
 
@@ -27,6 +28,7 @@
 // stuff for SHA512
 #include "sha2.h"
 #include "blockwise.h"
+#include "tweetnacl.h"
 #include APP_CONFIG
 #include "log.h"
 #include "memory_layout.h"
@@ -68,6 +70,25 @@ void crypto_sha256_init()
 
 void crypto_sha512_init() {
     cf_sha512_init(&sha512_ctx);
+}
+
+static uint8_t test_sk[64];//crypto_sign_ed25519_tweet_SECRETKEYBYTES];
+static uint8_t test_pk[32];//crypto_sign_ed25519_tweet_PUBLICKEYBYTES];
+
+void crypto_ed25519_init() {
+    crypto_sign_keypair(&test_pk, &test_sk);
+}
+
+void crypto_ed25519_sign(
+    uint8_t *signed_message, size_t *signed_message_len,
+    const uint8_t *message, size_t message_len//,
+    /* const uint8_t *secret_key */
+) {
+    crypto_sign(
+        signed_message, signed_message_len,
+        message, message_len,
+        test_sk
+    );
 }
 
 void crypto_load_master_secret(uint8_t * key)

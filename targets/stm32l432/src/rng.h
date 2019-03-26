@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 void rng_get_bytes(uint8_t * dst, size_t sz);
+void randombytes(uint8_t *dst, uint64_t sz);
 float shannon_entropy(float * p, size_t sz);
 float rng_test(size_t n);
 

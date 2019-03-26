@@ -791,6 +791,13 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
                 if (found)
                     sha_version = 512;
             }
+            if (!found) {
+                ret = cbor_value_text_string_equals(
+                        &val, "Ed25519", &found);
+                check_hardcore(ret);
+                if (found)
+                    sha_version = 25519;
+            }
             if (sha_version == 0)
                 exit(1);
 
@@ -830,6 +837,17 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
                 // write output
                 wb.bcnt = CF_SHA512_HASHSZ;  // 64 bytes
                 ctaphid_write(&wb, &ctap_buffer, CF_SHA512_HASHSZ);
+            }
+
+            if (sha_version == 25519) {
+                crypto_ed25519_init();
+                size_t signed_message_length = 0;
+                crypto_ed25519_sign(
+                    ctap_buffer, &signed_message_length,
+                    data, data_length
+                );
+                wb.bcnt = signed_message_length;
+                ctaphid_write(&wb, &ctap_buffer, signed_message_length);
             }
 
             // finalize
