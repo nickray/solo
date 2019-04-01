@@ -83,3 +83,4 @@ targets/*/docs/
 main
 
 builds/*
+*.log

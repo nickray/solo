@@ -23,6 +23,8 @@ void crypto_sha512_init();
 void crypto_sha512_update(const uint8_t * data, size_t len);
 void crypto_sha512_final(uint8_t * hash);
 
+void crypto_rsa2048_init();
+
 void crypto_ed25519_init();
 void crypto_ed25519_sign(
     uint8_t *signed_message, size_t *signed_message_len,

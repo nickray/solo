@@ -729,7 +729,7 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
             is_busy = 0;
         break;
 #endif
-#if defined(SOLO_HACKER) && (DEBUG_LEVEL > 0) && (!IS_BOOTLOADER == 1)
+#if defined(CRYPTOKI) || (defined(SOLO_HACKER) && (DEBUG_LEVEL > 0) && (!IS_BOOTLOADER == 1))
         case CTAPHID_PROBE:
 
             /*
@@ -798,6 +798,13 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
                 if (found)
                     sha_version = 25519;
             }
+            if (!found) {
+                ret = cbor_value_text_string_equals(
+                        &val, "RSA2048", &found);
+                check_hardcore(ret);
+                if (found)
+                    sha_version = 2048;
+            }
             if (sha_version == 0)
                 exit(1);
 
@@ -837,6 +844,12 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
                 // write output
                 wb.bcnt = CF_SHA512_HASHSZ;  // 64 bytes
                 ctaphid_write(&wb, &ctap_buffer, CF_SHA512_HASHSZ);
+            }
+
+            if (sha_version == 2048) {
+                crypto_rsa2048_init();
+                wb.bcnt = 0;
+                ctaphid_write(&wb, &ctap_buffer, 0);
             }
 
             if (sha_version == 25519) {

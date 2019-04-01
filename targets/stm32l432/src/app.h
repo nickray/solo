@@ -45,10 +45,10 @@ void hw_init(int lf);
 //#define TEST_POWER
 
 //                              0xRRGGBB
-#define LED_INIT_VALUE			0x000800
+#define LED_INIT_VALUE			0x020000
 #define LED_WINK_VALUE			0x000010
-#define LED_MAX_SCALER          15
-#define LED_MIN_SCALER          1
+#define LED_MAX_SCALER          5
+#define LED_MIN_SCALER          0
 // # of ms between each change in LED
 #define HEARTBEAT_PERIOD        150
 // Each LED channel will be multiplied by a integer between LED_MAX_SCALER

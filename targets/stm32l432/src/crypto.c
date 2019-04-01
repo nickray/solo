@@ -29,6 +29,7 @@
 #include "sha2.h"
 #include "blockwise.h"
 #include "tweetnacl.h"
+#include "mbedtls/rsa.h"
 #include APP_CONFIG
 #include "log.h"
 #include "memory_layout.h"
@@ -54,6 +55,7 @@ typedef enum
 
 static SHA256_CTX sha256_ctx;
 static cf_sha512_context sha512_ctx;
+static mbedtls_rsa_context rsa2048_ctx;
 static const struct uECC_Curve_t * _es256_curve = NULL;
 static const uint8_t * _signing_key = NULL;
 static int _key_len = 0;
@@ -72,11 +74,55 @@ void crypto_sha512_init() {
     cf_sha512_init(&sha512_ctx);
 }
 
+int rng_wrapper(void* unneeded_rng_context, unsigned char *buffer, size_t n_bytes) {
+    rng_get_bytes(buffer, n_bytes);
+    printf2(TAG_ERR, "generating randomness for %02x bytes\r\n", n_bytes);
+    return 0;
+}
+
+void crypto_rsa2048_init() {
+    mbedtls_rsa_init(&rsa2048_ctx, MBEDTLS_RSA_PKCS_V15, 0);
+    int ret = mbedtls_rsa_gen_key(
+        &rsa2048_ctx,
+        &rng_wrapper,
+        NULL,
+        2048,
+        65537
+    );
+    printf2(TAG_ERR, "returned %02x\r\n", ret);
+}
+
 static uint8_t test_sk[64];//crypto_sign_ed25519_tweet_SECRETKEYBYTES];
+// b"t\xc2\xec\xf8B\xa0\xc2A\xccp]m\xff\xde8*'\xb8\x9b\xdd\xff\xcf\xdc\xcf8\xd6\xd2\xe9\xd3\xf9}T\xc6\x99\x95\x18^\xfa \xbfz\x88\x13\x9fY 3Z\xa3\xd3\xe7\xf2\x04d4Z,\t\\vm\xfa\x15z"
+static uint8_t fixed_sk[64] = {
+0x74, 0xc2, 0xec, 0xf8, 0x42, 0xa0, 0xc2, 0x41, 0xcc, 0x70, 0x5d, 0x6d, 0xff, 0xde, 0x38, 0x2a, 0x27, 0xb8, 0x9b, 0xdd, 0xff, 0xcf, 0xdc, 0xcf, 0x38, 0xd6, 0xd2, 0xe9, 0xd3, 0xf9, 0x7d, 0x54, 0xc6, 0x99, 0x95, 0x18, 0x5e, 0xfa, 0x20, 0xbf, 0x7a, 0x88, 0x13, 0x9f, 0x59, 0x20, 0x33, 0x5a, 0xa3, 0xd3, 0xe7, 0xf2, 0x04, 0x64, 0x34, 0x5a, 0x2c, 0x09, 0x5c, 0x76, 0x6d, 0xfa, 0x15, 0x7a
+};
 static uint8_t test_pk[32];//crypto_sign_ed25519_tweet_PUBLICKEYBYTES];
+static uint8_t fixed_pk[32] = {
+0xc6, 0x99, 0x95, 0x18, 0x5e, 0xfa, 0x20, 0xbf, 0x7a, 0x88, 0x13, 0x9f, 0x59, 0x20, 0x33, 0x5a, 0xa3, 0xd3, 0xe7, 0xf2, 0x04, 0x64, 0x34, 0x5a, 0x2c, 0x09, 0x5c, 0x76, 0x6d, 0xfa, 0x15, 0x7a
+};
 
 void crypto_ed25519_init() {
-    crypto_sign_keypair(&test_pk, &test_sk);
+    /* crypto_sign_keypair(&test_pk, &test_sk); */
+    memmove(test_sk, fixed_sk, 64);
+
+    /*
+    uint8_t d[64];
+    typedef int64_t gf[16];
+    gf p[4];
+    crypto_hash(d, test_sk, 32);
+    d[0] &= 248;
+    d[31] &= 127;
+    d[31] |= 64;
+
+    scalarbase(p, d);
+    pack(test_pk, p);
+
+    for (int i = 0; i < 32; ++i)
+        test_sk[32 + i] = test_pk[i];
+    */
+
+    memmove(test_pk, fixed_pk, 32);
 }
 
 void crypto_ed25519_sign(

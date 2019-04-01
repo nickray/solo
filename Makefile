@@ -9,8 +9,12 @@
 
 ecc_platform=2
 
-src = $(wildcard pc/*.c) $(wildcard fido2/*.c) $(wildcard fido2/extensions/*.c) \
-	$(wildcard crypto/sha256/*.c) crypto/tiny-AES-c/aes.c
+src = $(wildcard pc/*.c)
+src += $(wildcard fido2/*.c) $(wildcard fido2/extensions/*.c)
+src += $(wildcard crypto/sha256/*.c)
+src += crypto/tiny-AES-c/aes.c
+src += crypto/cifra/src/sha512.c crypto/cifra/src/blockwise.c
+src += crypto/tweetnacl/tweetnacl.c
 
 obj = $(src:.c=.o) crypto/micro-ecc/uECC.o
 
@@ -34,17 +38,19 @@ VERSION_FLAGS= -DSOLO_VERSION_MAJ=$(VERSION_MAJ) -DSOLO_VERSION_MIN=$(VERSION_MI
 
 CFLAGS = -O2 -fdata-sections -ffunction-sections $(VERSION_FLAGS)
 
-INCLUDES = -I./tinycbor/src -I./crypto/sha256 -I./crypto/micro-ecc/ -Icrypto/tiny-AES-c/ -I./fido2/ -I./pc -I./fido2/extensions
-INCLUDES += -I./crypto/cifra/src
+INCLUDES = -I./tinycbor/src -I./crypto/sha256 -I./crypto/micro-ecc/ -Icrypto/tiny-AES-c/
+INCLUDES += -Ifido2 -Ifido2/extensions -Ipc
+INCLUDES += -Icrypto/cifra/src -Icrypto/cifra/src/ext
+INCLUDES += -Icrypto/tweetnacl
 
 CFLAGS += $(INCLUDES)
 # for crypto/tiny-AES-c
 CFLAGS += -DAES256=1 -DAPP_CONFIG=\"app.h\"
-
-name = main
+CFLAGS += -DCRYPTOKI
 
 .PHONY: all $(LIBCBOR) black blackcheck cppcheck wink fido2-test clean full-clean travis test clean version
-all: main
+main: $(obj) $(LIBCBOR)
+	$(CC) $(LDFLAGS) -o $@ $(obj) $(LDFLAGS)
 
 tinycbor/Makefile crypto/tiny-AES-c/aes.c:
 	git submodule update --init
@@ -65,9 +71,6 @@ test: venv
 	$(MAKE) -C ./targets/stm32l432 test PREFIX=$(PREFIX) "VENV=$(VENV)"
 	$(MAKE) clean
 	$(MAKE) cppcheck
-
-$(name): $(obj) $(LIBCBOR)
-	$(CC) $(LDFLAGS) -o $@ $(obj) $(LDFLAGS)
 
 crypto/micro-ecc/uECC.o: ./crypto/micro-ecc/uECC.c
 	$(CC) -c -o $@ $^ -O2 -fdata-sections -ffunction-sections -DuECC_PLATFORM=$(ecc_platform) -I./crypto/micro-ecc/

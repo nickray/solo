@@ -16,6 +16,12 @@ SRC += ../../fido2/extensions/extensions.c ../../fido2/extensions/solo.c
 SRC += ../../crypto/sha256/sha256.c ../../crypto/micro-ecc/uECC.c ../../crypto/tiny-AES-c/aes.c
 SRC += ../../crypto/cifra/src/sha512.c ../../crypto/cifra/src/blockwise.c
 SRC += ../../crypto/tweetnacl/tweetnacl.c
+# MBEDTLS_SRC = rsa.c rsa_internal.c bignum.c
+# SRC += $(MBEDTLS_SRC:.
+SRC += ../../crypto/mbedtls-rsa/rsa.c
+SRC += ../../crypto/mbedtls-rsa/rsa_internal.c
+SRC += ../../crypto/mbedtls-rsa/bignum.c
+SRC += ../../crypto/mbedtls-rsa/platform_util.c
 
 OBJ1=$(SRC:.c=.o)
 OBJ=$(OBJ1:.s=.o)
@@ -25,6 +31,7 @@ INC += -I../../tinycbor/src -I../../crypto/sha256 -I../../crypto/micro-ecc
 INC += -I../../crypto/tiny-AES-c
 INC += -I../../crypto/cifra/src -I../../crypto/cifra/src/ext
 INC += -I../../crypto/tweetnacl/
+INC += -I../../crypto/mbedtls-rsa/
 
 SEARCH=-L../../tinycbor/lib
 
